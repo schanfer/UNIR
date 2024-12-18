@@ -15,7 +15,7 @@ pipeline {
                 bat '''
                     set FLASK_APP=app\\api.py
                     set FLASK_ENV=development
-                    start /B flask run                '''
+                    start flask run                '''
                 script {
                     // Verificar si WireMock y Flask están corriendo (simplificado para la demostración)
                     waitUntil {
@@ -30,7 +30,7 @@ pipeline {
          stage ('startRest'){
             steps{
                 bat '''
-                    start /B java -jar D:\\UNIR\\software\\wiremock\\wiremock-standalone-3.10.0.jar --port 9090 --root-dir D:\\UNIR\\software\\wiremock
+                    start java -jar D:\\UNIR\\software\\wiremock\\wiremock-standalone-3.10.0.jar --port 9090 --root-dir D:\\UNIR\\software\\wiremock
                 '''
                 script {
                     // Verificar si WireMock y Flask están corriendo (simplificado para la demostración)
@@ -56,10 +56,12 @@ pipeline {
                 }  
                 stage('Rest'){
                     steps{
-                        bat '''
-                            SET PYTHONPATH=%WORKSPACE%
-                            pytest --junitxml=result-rest.xml test\\rest
-                        '''
+                        catchError(buildResult: 'UNSTABLE', stageResult:'FAILURE'){
+                            bat '''
+                                SET PYTHONPATH=%WORKSPACE%
+                                pytest --junitxml=result-rest.xml test\\rest
+                            '''
+                        }
                     }
                 }
                 
